@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'windows-slave'
+        label 'devesh-slave-1'
     }
     stages {
         stage('Clone Repository') {
