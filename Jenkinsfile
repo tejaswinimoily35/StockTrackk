@@ -1,3 +1,4 @@
+groovy
 pipeline {
     agent {
         label 'devesh-slave-1'
