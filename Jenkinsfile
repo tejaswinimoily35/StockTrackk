@@ -1,28 +1,46 @@
-groovy
 pipeline {
-    agent {
-        label 'devesh-slave-1'
+    agent any
+
+    environment {
+        IMAGE_NAME = 'deveshm026/stock-app'
     }
+
     stages {
-        stage('Clone Repository') {
+
+        stage('Clone Code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/tejaswinimoily35/StockTrackk.git'
+                git 'https://github.com/your-username/your-repo.git'
             }
         }
-        stage('Install Dependencies') {
+
+        stage('Build Docker Image') {
             steps {
-                bat 'npm install'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
-        stage('Build') {
+
+        stage('Login to Docker Hub') {
             steps {
-                bat 'echo Build stage complete - MongoDB env configured separately'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS')]) {
+
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
             }
         }
-    }
-    post {
-        success { echo 'Build Successful!' }
-        failure { echo 'Build Failed!' }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push $IMAGE_NAME'
+            }
+        }
+
+        stage('Deploy using Ansible (LOCAL)') {
+            steps {
+                sh 'ansible-playbook -i hosts deploy.yml'
+            }
+        }
     }
 }
