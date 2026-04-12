@@ -8,26 +8,38 @@ pipeline {
     stages {
 
         stage('Clone Code') {
-    steps {
-        git branch: 'main', url: 'https://github.com/tejaswinimoily35/StockTrackk.git'
-    }
-}
+            steps {
+                git branch: 'main', url: 'https://github.com/tejaswinimoily35/StockTrackk.git'
+            }
+        }
 
         stage('Build Docker Image') {
-    steps {
-        withCredentials([string(credentialsId: 'mongo-uri', variable: 'MONGODB_URI')]) {
-            sh 'docker build --build-arg MONGODB_URI=$MONGODB_URI -t $IMAGE_NAME .'
+            steps {
+                withCredentials([
+                    string(credentialsId: 'mongo-uri', variable: 'MONGODB_URI'),
+                    string(credentialsId: 'auth-secret', variable: 'BETTER_AUTH_SECRET'),
+                    string(credentialsId: 'gemini-key', variable: 'GEMINI_API_KEY'),
+                    string(credentialsId: 'email-pass', variable: 'NODEMAILER_PASSWORD')
+                ]) {
+                    sh '''
+                    docker build \
+                    --build-arg MONGODB_URI=$MONGODB_URI \
+                    --build-arg BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET \
+                    --build-arg GEMINI_API_KEY=$GEMINI_API_KEY \
+                    --build-arg NODEMAILER_PASSWORD=$NODEMAILER_PASSWORD \
+                    -t $IMAGE_NAME .
+                    '''
+                }
+            }
         }
-    }
-}
 
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
                     usernameVariable: 'USER',
-                    passwordVariable: 'PASS')]) {
-
+                    passwordVariable: 'PASS'
+                )]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
                 }
             }
