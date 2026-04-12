@@ -1,0 +1,19 @@
+- name: Deploy Next.js app locally
+  hosts: web
+  become: false
+
+  tasks:
+
+    - name: Pull latest image
+      command: docker pull deveshm026/stock-app
+
+    - name: Stop old container
+      command: docker stop stock-app
+      ignore_errors: yes
+
+    - name: Remove old container
+      command: docker rm stock-app
+      ignore_errors: yes
+
+    - name: Run new container
+      command: docker run -d -p 3000:3000 --name stock-app deveshm026/stock-app
