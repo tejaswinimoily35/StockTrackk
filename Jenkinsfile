@@ -8,10 +8,10 @@ pipeline {
     stages {
 
         stage('Clone Code') {
-            steps {
-                git 'https://github.com/tejaswinimoily35/StockTrackk.git'
-            }
-        }
+    steps {
+        git branch: 'main', url: 'https://github.com/tejaswinimoily35/StockTrackk.git'
+    }
+}
 
         stage('Build Docker Image') {
             steps {
