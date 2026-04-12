@@ -14,10 +14,12 @@ pipeline {
 }
 
         stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME .'
-            }
+    steps {
+        withCredentials([string(credentialsId: 'mongo-uri', variable: 'MONGODB_URI')]) {
+            sh 'docker build --build-arg MONGODB_URI=$MONGODB_URI -t $IMAGE_NAME .'
         }
+    }
+}
 
         stage('Login to Docker Hub') {
             steps {
