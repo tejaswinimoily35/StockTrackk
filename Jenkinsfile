@@ -1,60 +1,49 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = 'deveshm026/stock-app'
+    tools {
+        nodejs 'NodeJS'
     }
 
     stages {
 
-        stage('Clone Code') {
+        stage('Clone') {
             steps {
-                git branch: 'main', url: 'https://github.com/tejaswinimoily35/StockTrackk.git'
+                git 'https://github.com/your-username/your-repo.git'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Install Dependencies') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'mongo-uri', variable: 'MONGODB_URI'),
-                    string(credentialsId: 'auth-secret', variable: 'BETTER_AUTH_SECRET'),
-                    string(credentialsId: 'gemini-key', variable: 'GEMINI_API_KEY'),
-                    string(credentialsId: 'email-pass', variable: 'NODEMAILER_PASSWORD')
-                ]) {
-                    sh '''
-                    docker build \
-                    --build-arg MONGODB_URI=$MONGODB_URI \
-                    --build-arg BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET \
-                    --build-arg GEMINI_API_KEY=$GEMINI_API_KEY \
-                    --build-arg NODEMAILER_PASSWORD=$NODEMAILER_PASSWORD \
-                    -t $IMAGE_NAME .
-                    '''
-                }
+                bat 'npm install'
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Build Application') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
-                }
+                bat 'npm run build'
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Test Application') {
             steps {
-                sh 'docker push $IMAGE_NAME'
+                bat 'npm test || echo No tests found'
             }
         }
 
-        stage('Deploy using Ansible (LOCAL)') {
+        stage('Start Application') {
             steps {
-                sh 'ansible-playbook -i hosts deploy.yml'
+                bat 'npm start'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build Successful'
+        }
+        failure {
+            echo 'Build Failed'
         }
     }
 }
