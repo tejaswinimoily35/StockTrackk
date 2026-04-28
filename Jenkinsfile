@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS'
-    }
-
     stages {
 
         stage('Check Node') {
@@ -28,7 +24,7 @@ pipeline {
 
         stage('Test Application') {
             steps {
-                bat 'npm test || echo No tests found'
+                bat 'npm test || echo No tests'
             }
         }
 
@@ -36,15 +32,6 @@ pipeline {
             steps {
                 bat 'start /B npm start'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build Successful'
-        }
-        failure {
-            echo 'Build Failed'
         }
     }
 }
