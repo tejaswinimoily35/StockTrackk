@@ -7,9 +7,10 @@ pipeline {
 
     stages {
 
-        stage('Clone') {
+        stage('Check Node') {
             steps {
-                git 'https://github.com/your-username/your-repo.git'
+                bat 'node -v'
+                bat 'npm -v'
             }
         }
 
@@ -33,7 +34,7 @@ pipeline {
 
         stage('Start Application') {
             steps {
-                bat 'npm start'
+                bat 'start /B npm start'
             }
         }
     }
